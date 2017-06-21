@@ -1,0 +1,3 @@
+requests==2.8.1
+drone==0.3.0
+boto3==1.4.4
