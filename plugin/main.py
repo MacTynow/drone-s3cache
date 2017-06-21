@@ -1,9 +1,8 @@
 #!/usr/bin/env python
-"""
-Cache build artifacts on s3 for drone.io
-"""
+
 import drone
-import requests
+import boto3
+from s3cache import S3Cache
 
 
 def main():
@@ -14,11 +13,25 @@ def main():
     payload = drone.plugin.get_input()
     # vargs are where the values passed in the YaML reside.
     vargs = payload["vargs"]
-
-    # Formulate the POST request.
     data = payload["build"]
-    response = requests.post(vargs["url"], data=data)
-    response.raise_for_status()
+    
+    if "[NO CACHE]" in data["message"]:
+        print "Found [NO CACHE] in commit message, skipping cache restore and rebuild!"
+        return
+
+    s3client = boto3.client("s3")
+    s3cache = S3Cache()
+
+    if vargs.has_key("restore") and vargs["restore"]:
+        if "[CLEAR CACHE]" in data["message"]:
+            s3cache.clear(s3client, vargs["bucket"])
+            return
+        else:
+            s3cache.restore(s3client)
+    elif vargs.has_key("rebuild") and vargs["rebuild"]:
+        s3cache.build(s3client, vargs["bucket"], vargs["mount"])
+    else:
+        print "No restore or rebuild flag specified, plugin won't do anything!"
 
 
 if __name__ == "__main__":

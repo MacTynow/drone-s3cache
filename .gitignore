@@ -4,3 +4,6 @@
 *.tmp
 *~
 .idea
+tmp
+.cache
+tests/test_data/*
