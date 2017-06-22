@@ -1,5 +1,6 @@
 # drone-s3cache
 
+[![CircleCI](https://circleci.com/gh/MacTynow/drone-s3cache.svg?style=svg)](https://circleci.com/gh/MacTynow/drone-s3cache)
 
 Cache build artifacts on s3 for drone.io
 
