@@ -2,14 +2,14 @@
 #
 #     docker build --rm=true -t MacTynow/drone-s3cache .
 
-FROM gliderlabs/alpine:3.2
+FROM alpine:3.6
 MAINTAINER MacTynow <charles.martinot@gmail.com>
 
-RUN apk-install python3
+RUN apk -U add python py2-pip
 RUN mkdir -p /opt/drone
 COPY requirements.txt /opt/drone/
 WORKDIR /opt/drone
-RUN pip3 install -r requirements.txt
-COPY plugin /opt/drone/
+RUN pip install -r requirements.txt
+COPY plugin/ /opt/drone/plugin/
 
-ENTRYPOINT ["python3", "/opt/drone/plugin/main.py"]
+CMD ["python", "/opt/drone/plugin/main.py"]
