@@ -8,6 +8,7 @@ The following parameters are used to configuration the plugin's behavior:
 * **bucket** - The s3 bucket name
 * **restore** - Restore the cache (bool)
 * **rebuild** - Rebuild the cache (bool)
+* **cache** - list of directories to cache
 
 The following is a sample drone-s3cache configuration in your 
 .drone.yml file:
@@ -21,9 +22,7 @@ notify:
     region: us-east-1
     bucket: drone-cache
     rebuild: true
-    mount: 
+    cache: 
       - node_volumes
       - vendor/bundle
-    volumes:
-      - myproject:/cache
 ```

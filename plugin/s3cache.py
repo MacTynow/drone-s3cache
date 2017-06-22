@@ -7,29 +7,27 @@ import os
 
 
 class S3Cache:
-    # TODO: make sure it can namespace different project
-    def build(self, s3client, bucket, sources):
+    def build(self, s3client, bucket, sources, namespace):
         for path in sources:
             print "Rebuilding cache for %s..." % path
             for root,dirs,files in os.walk(path):
                 for file in files:
                     filename = os.path.join(root, file)
-                    s3client.upload_file(filename, bucket, filename)
+                    target = ''.join([namespace, '/', filename])
+                    s3client.upload_file(filename, bucket, target)
 
-    # TODO: make sure it can namespace different project
-    def restore(self, s3client, bucket, sources, dest):
+    def restore(self, s3client, bucket, sources, namespace):
         for source in sources:
-            print "Restoring cache for %s..." % dest
+            print "Restoring cache for %s..." % source
             
-            dirname =  ''.join([dest[sources.index(source)], '/', source])
-            if not os.path.exists(dirname):
-                os.makedirs(dirname)
+            if not os.path.exists(source):
+                os.makedirs(source)
 
-            objs = s3client.list_objects(Bucket=bucket, Prefix=source)['Contents']
+            s3path = ''.join([namespace, '/', source])
+            objs = s3client.list_objects(Bucket=bucket, Prefix=s3path)['Contents']
             for obj in objs:
-                filepath = obj['Key']
-                target = ''.join([dest[sources.index(source)], '/', filepath])
-                s3client.download_file(bucket, filepath, target)
+                target = obj['Key'].strip(namespace + '/')
+                s3client.download_file(bucket, obj['Key'], target)
 
     def clear(self, s3client, bucket, namespace):
         print "Found [CLEAR CACHE] in commit message, clearing cache!"

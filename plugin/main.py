@@ -14,6 +14,7 @@ def main():
     # vargs are where the values passed in the YaML reside.
     vargs = payload["vargs"]
     data = payload["build"]
+    repo = payload["repo"]
     
     if "[NO CACHE]" in data["message"]:
         print "Found [NO CACHE] in commit message, skipping cache restore and rebuild!"
@@ -24,12 +25,12 @@ def main():
 
     if vargs.has_key("restore") and vargs["restore"]:
         if "[CLEAR CACHE]" in data["message"]:
-            s3cache.clear(s3client, vargs["bucket"])
+            s3cache.clear(s3client, vargs["bucket"], repo["name"])
             return
         else:
-            s3cache.restore(s3client)
+            s3cache.restore(s3client, vargs["bucket"], vargs["cache"], repo["name"])
     elif vargs.has_key("rebuild") and vargs["rebuild"]:
-        s3cache.build(s3client, vargs["bucket"], vargs["mount"])
+        s3cache.build(s3client, vargs["bucket"], vargs["cache"], repo["name"])
     else:
         print "No restore or rebuild flag specified, plugin won't do anything!"
 

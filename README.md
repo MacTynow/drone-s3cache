@@ -37,7 +37,8 @@ python plugin/main.py <<EOF
   "vargs": {
     "region": "us-east-1",
     "bucket": "mybucket",
-    "rebuild": "true"
+    "rebuild": "true",
+    "cache": ["node_volumes", "vendor/bundle"]
   }
 }
 EOF
@@ -72,7 +73,8 @@ docker run -i MacTynow/drone-s3cache <<EOF
   "vargs": {
     "region": "us-east-1",
     "bucket": "mybucket",
-    "rebuild": "true"
+    "rebuild": "true",
+    "cache": ["node_volumes", "vendor/bundle"]
   }
 }
 EOF
