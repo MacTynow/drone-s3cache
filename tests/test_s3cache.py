@@ -11,13 +11,16 @@ class TestS3cache():
     client = boto3.client("s3", region_name="us-east-1")
     resource = boto3.resource("s3")
     s3cache = S3Cache()
-    test_string = ''.join(random.choice(string.ascii_uppercase + string.ascii_lowercase + string.digits) for _ in range(64))
+    test_string = "".join(random.choice(string.ascii_uppercase + string.ascii_lowercase + string.digits) for _ in range(64))
 
     def setup(self):
         self.client.create_bucket(Bucket="mybucket") 
 
     def test_s3cache_build_cache(self):
-        with open('tests/test_data/test.txt', 'w+') as f:
+        if not os.path.exists("tests/test_data/"):
+            os.makedirs("tests/test_data/")
+
+        with open("tests/test_data/test.txt", "w+") as f:
             f.write(self.test_string)
 
         self.s3cache.build(self.client, "mybucket", ["tests/test_data"], "reponame")
