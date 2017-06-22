@@ -2,6 +2,7 @@
 
 import drone
 import boto3
+import os
 from s3cache import S3Cache
 
 
@@ -9,28 +10,30 @@ def main():
     """
     The main entrypoint for the plugin.
     """
-    # Retrives plugin input from stdin/argv, parses the JSON, returns a dict.
-    payload = drone.plugin.get_input()
-    # vargs are where the values passed in the YaML reside.
-    vargs = payload["vargs"]
-    data = payload["build"]
-    repo = payload["repo"]
-    
-    if "[NO CACHE]" in data["message"]:
+    data = os.environ
+    bucket = data["PLUGIN_BUCKET"]
+    cache = data["PLUGIN_CACHE"]
+    repo_name = data["DRONE_REPO_NAME"]
+    commit_message = data["DRONE_COMMIT_MESSAGE"]
+
+    if "[NO CACHE]" in commit_message:
         print "Found [NO CACHE] in commit message, skipping cache restore and rebuild!"
         return
 
-    s3client = boto3.client("s3")
+    s3client = boto3.client("s3",
+                aws_access_key_id=os.environ["PLUGIN_AWS_ACCESS_KEY_ID"],
+                aws_secret_access_key=os.environ["PLUGIN_AWS_SECRET_ACCESS_KEY"])
+    s3res = boto3.resource("s3",)
     s3cache = S3Cache()
 
-    if vargs.has_key("restore") and vargs["restore"]:
-        if "[CLEAR CACHE]" in data["message"]:
-            s3cache.clear(s3client, vargs["bucket"], repo["name"])
+    if data.has_key("PLUGIN_RESTORE") and data["PLUGIN_RESTORE"]:
+        if "[CLEAR CACHE]" in commit_message:
+            s3cache.clear(s3client, bucket, repo_name)
             return
         else:
-            s3cache.restore(s3client, vargs["bucket"], vargs["cache"], repo["name"])
-    elif vargs.has_key("rebuild") and vargs["rebuild"]:
-        s3cache.build(s3client, vargs["bucket"], vargs["cache"], repo["name"])
+            s3cache.restore(s3client, bucket, cache, repo_name)
+    elif data.has_key("PLUGIN_REBUILD") and data["PLUGIN_REBUILD"]:
+        s3cache.build(s3client, bucket, cache, repo_name)
     else:
         print "No restore or rebuild flag specified, plugin won't do anything!"
 

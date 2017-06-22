@@ -13,8 +13,16 @@ class TestS3cache():
     s3cache = S3Cache()
     test_string = "".join(random.choice(string.ascii_uppercase + string.ascii_lowercase + string.digits) for _ in range(64))
 
+
     def setup(self):
         self.client.create_bucket(Bucket="mybucket") 
+
+
+    def test_s3cache_restore_empty_cache(self):
+        response = self.s3cache.restore(self.client, "mybucket", ["tests/test_data"], "reponame")
+
+        assert response == "nocache"
+
 
     def test_s3cache_build_cache(self):
         if not os.path.exists("tests/test_data/"):
@@ -28,6 +36,7 @@ class TestS3cache():
 
         assert self.test_string in response.get()["Body"].read().decode("utf-8")
 
+
     def test_s3cache_restore_cache(self):
         # Remove the file before checking the restore function
         os.remove("tests/test_data/test.txt")
@@ -36,6 +45,7 @@ class TestS3cache():
         test_file = open("tests/test_data/test.txt")
 
         assert self.test_string in test_file.read()
+
 
     def test_s3cache_clear_cache(self):
         self.s3cache.clear(self.client, "mybucket", "reponame")

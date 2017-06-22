@@ -16,19 +16,28 @@ class S3Cache:
                     target = ''.join([namespace, '/', filename])
                     s3client.upload_file(filename, bucket, target)
 
+
     def restore(self, s3client, bucket, sources, namespace):
         for source in sources:
-            print "Restoring cache for %s..." % source
-            
-            if not os.path.exists(source):
-                os.makedirs(source)
-
             s3path = ''.join([namespace, '/', source])
-            objs = s3client.list_objects(Bucket=bucket, Prefix=s3path)['Contents']
-            for obj in objs:
-                target = obj['Key'].strip(namespace + '/')
-                s3client.download_file(bucket, obj['Key'], target)
+            objs = s3client.list_objects(Bucket=bucket, Prefix=s3path)
+            
+            if objs.has_key("Contents"):
+                print "Restoring cache for %s..." % source
+                        
+                if not os.path.exists(source):
+                    os.makedirs(source)
 
+                keys = objs['Contents']
+                for obj in keys:
+                    target = obj['Key'].strip(namespace + '/')
+                    s3client.download_file(bucket, obj['Key'], target)
+            else:
+                print "There is no cache for %s" % source
+                return "nocache"
+
+
+    # Need to handle empty buckets
     def clear(self, s3client, bucket, namespace):
         print "Found [CLEAR CACHE] in commit message, clearing cache!"
         objs = s3client.list_objects(Bucket=bucket, Prefix=namespace)['Contents']
