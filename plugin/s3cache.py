@@ -24,13 +24,14 @@ class S3Cache:
             
             if objs.has_key("Contents"):
                 print "Restoring cache for %s..." % source
-                        
-                if not os.path.exists(source):
-                    os.makedirs(source)
-
                 keys = objs['Contents']
+
                 for obj in keys:
                     target = obj['Key'].strip(namespace + '/')
+
+                    if not os.path.exists(os.path.dirname(target)):
+                        os.makedirs(os.path.dirname(target))
+                    
                     s3client.download_file(bucket, obj['Key'], target)
             else:
                 print "There is no cache for %s" % source
