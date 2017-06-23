@@ -12,7 +12,7 @@ def main():
     """
     data = os.environ
     bucket = data["PLUGIN_BUCKET"]
-    cache = data["PLUGIN_CACHE"]
+    cache = data["PLUGIN_CACHE"].split(',')
     repo_name = data["DRONE_REPO_NAME"]
     commit_message = data["DRONE_COMMIT_MESSAGE"]
 
