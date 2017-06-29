@@ -4,38 +4,49 @@ Cache build artifacts on s3 for drone.io
 """
 import boto3
 import os
-
+import tarfile
 
 class S3Cache:
     def build(self, s3client, bucket, sources, namespace):
         for path in sources:
-            print "Rebuilding cache for %s..." % path
-            for root,dirs,files in os.walk(path):
-                for file in files:
-                    filename = os.path.join(root, file)
-                    target = ''.join([namespace, '/', filename])
-                    s3client.upload_file(filename, bucket, target)
+            if os.path.exists(path):
+                print "Rebuilding cache for %s..." % path
+
+                tarname = namespace + ".tar.gz"
+                tar = tarfile.open(tarname, "w:gz")
+                tar.add(path)
+                tar.close()
+
+                target = ''.join([namespace, '/', tarname])
+                s3client.upload_file(tarname, bucket, target)
+            else:
+                print "There is nothing to cache for %s" % path
+
+        print "Done!"
 
 
     def restore(self, s3client, bucket, sources, namespace):
         for source in sources:
-            s3path = ''.join([namespace, '/', source])
-            objs = s3client.list_objects(Bucket=bucket, Prefix=s3path)
+            print "Restoring cache for %s..." % source
+
+            tarname = namespace + ".tar.gz"
+            s3path = ''.join([namespace, '/', tarname])
             
-            if objs.has_key("Contents"):
-                print "Restoring cache for %s..." % source
-                keys = objs['Contents']
+            obj = s3client.list_objects(Bucket=bucket, Prefix=s3path)
+            if obj.has_key("Contents"):
+                s3client.download_file(bucket, obj["Contents"][0]["Key"], tarname)
 
-                for obj in keys:
-                    target = obj['Key'].strip(namespace + '/')
+                if not os.path.exists(source):
+                    os.makedirs(source)
 
-                    if not os.path.exists(os.path.dirname(target)):
-                        os.makedirs(os.path.dirname(target))
-                    
-                    s3client.download_file(bucket, obj['Key'], target)
+                tar = tarfile.open(tarname, "r:gz")
+                tar.extractall()
+                tar.close()
             else:
                 print "There is no cache for %s" % source
                 return "nocache"
+
+        print "Done!"
 
 
     # Need to handle empty buckets

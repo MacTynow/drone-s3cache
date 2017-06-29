@@ -32,9 +32,9 @@ class TestS3cache():
             f.write(self.test_string)
 
         self.s3cache.build(self.client, "mybucket", ["tests/test_data"], "reponame")
-        response = self.resource.Object("mybucket", "reponame/tests/test_data/test.txt")
+        response = self.client.list_objects(Bucket="mybucket", Prefix="reponame/reponame.tar.gz")
 
-        assert self.test_string in response.get()["Body"].read().decode("utf-8")
+        assert response.has_key("Contents") == True
 
 
     def test_s3cache_restore_cache(self):

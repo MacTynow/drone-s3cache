@@ -7,3 +7,4 @@
 tmp
 .cache
 tests/test_data/*
+reponame*
