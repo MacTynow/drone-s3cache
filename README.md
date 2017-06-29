@@ -14,35 +14,14 @@ This plugin is inspired by and contains bits of https://github.com/Drillster/dro
 Run the plugin directly after installing requirements:
 
 ```bash
-python plugin/main.py <<EOF
-{
-  "repo" : {
-    "owner": "foo",
-    "name": "bar",
-    "full_name": "foo/bar"
-  },
-  "system": {
-    "link_url": "http://drone.mycompany.com"
-  },
-  "build" : {
-    "number": 22,
-    "status": "success",
-    "started_at": 1421029603,
-    "finished_at": 1421029813,
-    "commit": "9f2849d5",
-    "branch": "master",
-    "message": "Update the Readme",
-    "author": "johnsmith",
-    "author_email": "john.smith@gmail.com"
-  },
-  "vargs": {
-    "region": "us-east-1",
-    "bucket": "mybucket",
-    "rebuild": "true",
-    "cache": ["node_volumes", "vendor/bundle"]
-  }
-}
-EOF
+export PLUGIN_AWS_ACCESS_KEY_ID=accesskeyid
+export PLUGIN_AWS_SECRET_ACCESS_KEY=secretaccesskey
+export PLUGIN_BUCKET=drone-cache
+export PLUGIN_REBUILD=true
+export PLUGIN_CACHE=test
+export DRONE_REPO_NAME=test
+export DRONE_COMMIT_MESSAGE=test
+python plugin/main.py
 ```
 
 ## Docker
@@ -50,34 +29,14 @@ EOF
 Alternatively, run the plugin directly from a built Docker image:
 
 ```bash
-docker run -i MacTynow/drone-s3cache <<EOF
-{
-  "repo" : {
-    "owner": "foo",
-    "name": "bar",
-    "full_name": "foo/bar"
-  },
-  "system": {
-    "link_url": "http://drone.mycompany.com"
-  },
-  "build" : {
-    "number": 22,
-    "status": "success",
-    "started_at": 1421029603,
-    "finished_at": 1421029813,
-    "commit": "9f2849d5",
-    "branch": "master",
-    "message": "Update the Readme",
-    "author": "johnsmith",
-    "author_email": "john.smith@gmail.com"
-  },
-  "vargs": {
-    "region": "us-east-1",
-    "bucket": "mybucket",
-    "rebuild": "true",
-    "cache": ["node_volumes", "vendor/bundle"]
-  }
-}
+docker run -e PLUGIN_AWS_ACCESS_KEY_ID=accesskeyid \
+  -e PLUGIN_AWS_SECRET_ACCESS_KEY=secretaccesskey \
+  -e PLUGIN_BUCKET=drone-cache \
+  -e PLUGIN_REBUILD=true \
+  -e PLUGIN_CACHE=test \
+  -e DRONE_REPO_NAME=test \
+  -e DRONE_COMMIT_MESSAGE=test \
+  -i mactynow/drone-s3cache
 EOF
 ```
 
