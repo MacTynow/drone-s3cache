@@ -17,7 +17,7 @@ class S3Cache:
                 tar.add(path)
                 tar.close()
 
-                target = ''.join([namespace, '/', tarname])
+                target = '/'.join([namespace, tarname])
                 s3client.upload_file(tarname, bucket, target)
             else:
                 print "There is nothing to cache for %s" % path
@@ -30,7 +30,7 @@ class S3Cache:
             print "Restoring cache for %s..." % source
 
             tarname = namespace + ".tar.gz"
-            s3path = ''.join([namespace, '/', tarname])
+            s3path = '/'.join([namespace, tarname])
             
             obj = s3client.list_objects(Bucket=bucket, Prefix=s3path)
             if obj.has_key("Contents"):
