@@ -37,7 +37,6 @@ docker run -e PLUGIN_AWS_ACCESS_KEY_ID=accesskeyid \
   -e DRONE_REPO_NAME=test \
   -e DRONE_COMMIT_MESSAGE=test \
   -i mactynow/drone-s3cache
-EOF
 ```
 
 
